@@ -1903,8 +1903,8 @@ mod tests {
 
     #[test]
     fn max_target_from_compact() {
-        // The highest possible target is defined as 0x1d00ffff
-        let bits = 0x1d00ffff_u32;
+        // The highest possible target is defined as 0x1e0ffff0
+        let bits = 0x1e0ffff0_u32;
         let want = Target::MAX;
         let got = Target::from_compact(CompactTarget::from_consensus(bits));
         assert_eq!(got, want)

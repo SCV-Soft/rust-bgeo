@@ -141,9 +141,9 @@ impl Params {
     pub const MAINNET: Params = Params {
         network: Network::Bitcoin,
         bip16_time: 1333238400,                      // Apr 1 2012
-        bip34_height: BlockHeight::from_u32(227931), // 000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8
-        bip65_height: BlockHeight::from_u32(388381), // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
-        bip66_height: BlockHeight::from_u32(363725), // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
+        bip34_height: BlockHeight::from_u32(0), // 000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8
+        bip65_height: BlockHeight::from_u32(0), // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
+        bip66_height: BlockHeight::from_u32(0), // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
         rule_change_activation_threshold: BlockInterval::from_u32(1916), // 95%
         miner_confirmation_window: BlockInterval::from_u32(2016),
         pow_limit: Target::MAX_ATTAINABLE_MAINNET,

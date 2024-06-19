@@ -35,7 +35,7 @@ pub const MAX_BLOCK_SIGOPS_COST: i64 = 80_000;
 /// Mainnet (bitcoin) pubkey address prefix.
 pub const PUBKEY_ADDRESS_PREFIX_MAIN: u8 = 0; // 0x00
 /// Mainnet (bitcoin) script address prefix.
-pub const SCRIPT_ADDRESS_PREFIX_MAIN: u8 = 5; // 0x05
+pub const SCRIPT_ADDRESS_PREFIX_MAIN: u8 = 38; // 0x05
 /// Test (tesnet, signet, regtest) pubkey address prefix.
 pub const PUBKEY_ADDRESS_PREFIX_TEST: u8 = 111; // 0x6f
 /// Test (tesnet, signet, regtest) script address prefix.
@@ -55,7 +55,7 @@ pub const COINBASE_MATURITY: u32 = 100;
 
 // This is the 65 byte (uncompressed) pubkey used as the one-and-only output of the genesis transaction.
 //
-// ref: https://blockstream.info/tx/4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b?expand
+// ref: https://blockstream.info/tx/0174fe8dedef852e3bf893579449eff84cc63ea7aee64e72e07959cac43abc7f?expand
 // Note output script includes a leading 0x41 and trailing 0xac (added below using the `script::Builder`).
 #[rustfmt::skip]
 const GENESIS_OUTPUT_PK: [u8; 65] = [
@@ -84,7 +84,7 @@ fn bitcoin_genesis_tx() -> Transaction {
     let in_script = script::Builder::new()
         .push_int(486604799)
         .push_int_non_minimal(4)
-        .push_slice(b"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks")
+        .push_slice(b"02/02/2024 - This is Bitcoin Global Eternal Oasis.")
         .into_script();
     ret.input.push(TxIn {
         previous_output: OutPoint::null(),
@@ -113,9 +113,9 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 version: block::Version::ONE,
                 prev_blockhash: BlockHash::all_zeros(),
                 merkle_root,
-                time: 1231006505,
-                bits: CompactTarget::from_consensus(0x1d00ffff),
-                nonce: 2083236893,
+                time: 1706849649,
+                bits: CompactTarget::from_consensus(0x1e0ffff0),
+                nonce: 305664,
             },
             txdata,
         },
@@ -125,7 +125,7 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 prev_blockhash: BlockHash::all_zeros(),
                 merkle_root,
                 time: 1296688602,
-                bits: CompactTarget::from_consensus(0x1d00ffff),
+                bits: CompactTarget::from_consensus(0x1e0ffff0),
                 nonce: 414098458,
             },
             txdata,
@@ -234,13 +234,13 @@ mod test {
         assert_eq!(gen.input[0].sequence, Sequence::MAX);
         assert_eq!(gen.output.len(), 1);
         assert_eq!(serialize(&gen.output[0].script_pubkey),
-                   hex!("434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"));
+                   hex!("4341047cb27a8a1ff2d5c4c00cff87f16c2b5ce61a1aa849b84122a45f06ed6dfae0bd483245a59ffa828bfa442a80b6549f681a72f1406ef53ad60b73e70de5a9fd48ac"));
         assert_eq!(gen.output[0].value, Amount::from_str("50 BTC").unwrap());
         assert_eq!(gen.lock_time, absolute::LockTime::ZERO);
 
         assert_eq!(
             gen.compute_wtxid().to_string(),
-            "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+            "0174fe8dedef852e3bf893579449eff84cc63ea7aee64e72e07959cac43abc7f"
         );
     }
 
@@ -264,15 +264,15 @@ mod test {
         assert_eq!(gen.header.prev_blockhash, BlockHash::all_zeros());
         assert_eq!(
             gen.header.merkle_root.to_string(),
-            "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+            "0174fe8dedef852e3bf893579449eff84cc63ea7aee64e72e07959cac43abc7f"
         );
 
-        assert_eq!(gen.header.time, 1231006505);
-        assert_eq!(gen.header.bits, CompactTarget::from_consensus(0x1d00ffff));
-        assert_eq!(gen.header.nonce, 2083236893);
+        assert_eq!(gen.header.time, 1706849649);
+        assert_eq!(gen.header.bits, CompactTarget::from_consensus(0x1e0ffff0));
+        assert_eq!(gen.header.nonce, 305664);
         assert_eq!(
             gen.header.block_hash().to_string(),
-            "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+            "0000070e7e8109ac9d4453c40980990d0ac7ec3a10b8fd96537ebab27f66ae8a"
         );
     }
 
@@ -283,10 +283,10 @@ mod test {
         assert_eq!(gen.header.prev_blockhash, BlockHash::all_zeros());
         assert_eq!(
             gen.header.merkle_root.to_string(),
-            "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+            "0174fe8dedef852e3bf893579449eff84cc63ea7aee64e72e07959cac43abc7f"
         );
         assert_eq!(gen.header.time, 1296688602);
-        assert_eq!(gen.header.bits, CompactTarget::from_consensus(0x1d00ffff));
+        assert_eq!(gen.header.bits, CompactTarget::from_consensus(0x1e0ffff0));
         assert_eq!(gen.header.nonce, 414098458);
         assert_eq!(
             gen.header.block_hash().to_string(),
@@ -301,7 +301,7 @@ mod test {
         assert_eq!(gen.header.prev_blockhash, BlockHash::all_zeros());
         assert_eq!(
             gen.header.merkle_root.to_string(),
-            "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+            "0174fe8dedef852e3bf893579449eff84cc63ea7aee64e72e07959cac43abc7f"
         );
         assert_eq!(gen.header.time, 1598918400);
         assert_eq!(gen.header.bits, CompactTarget::from_consensus(0x1e0377ae));
