@@ -43,6 +43,8 @@ use crate::error::{IncorrectChecksumError, TooShortError};
 #[doc(inline)]
 pub use self::error::{Error, InvalidCharacterError};
 
+use log::{info, error};
+
 #[rustfmt::skip]
 static BASE58_DIGITS: [Option<u8>; 128] = [
     None,     None,     None,     None,     None,     None,     None,     None,     // 0-7
@@ -65,17 +67,17 @@ static BASE58_DIGITS: [Option<u8>; 128] = [
 
 /// Decodes a base58-encoded string into a byte vector.
 pub fn decode(data: &str) -> Result<Vec<u8>, InvalidCharacterError> {
-    // 11/15 is just over log_256(58)
+    info!("Decoding base58: {}", data);
     let mut scratch = vec![0u8; 1 + data.len() * 11 / 15];
-    // Build in base 256
     for d58 in data.bytes() {
-        // Compute "X = X * 58 + next_digit" in base 256
         if d58 as usize >= BASE58_DIGITS.len() {
+            error!("Invalid character encountered: {}", d58);
             return Err(InvalidCharacterError { invalid: d58 });
         }
         let mut carry = match BASE58_DIGITS[d58 as usize] {
             Some(d58) => d58 as u32,
             None => {
+                error!("Invalid character encountered: {}", d58);
                 return Err(InvalidCharacterError { invalid: d58 });
             }
         };
@@ -87,33 +89,35 @@ pub fn decode(data: &str) -> Result<Vec<u8>, InvalidCharacterError> {
         assert_eq!(carry, 0);
     }
 
-    // Copy leading zeroes directly
     let mut ret: Vec<u8> = data.bytes().take_while(|&x| x == BASE58_CHARS[0]).map(|_| 0).collect();
-    // Copy rest of string
     ret.extend(scratch.into_iter().skip_while(|&x| x == 0));
+    info!("Decoded result: {:?}", ret);
     Ok(ret)
 }
 
 /// Decodes a base58check-encoded string into a byte vector verifying the checksum.
 pub fn decode_check(data: &str) -> Result<Vec<u8>, Error> {
+    info!("Decoding base58check: {}", data);
     let mut ret: Vec<u8> = decode(data)?;
     if ret.len() < 4 {
+        error!("Data too short: length {}", ret.len());
         return Err(TooShortError { length: ret.len() }.into());
     }
     let check_start = ret.len() - 4;
 
-    let hash_check =
-        sha256d::Hash::hash(&ret[..check_start])[..4].try_into().expect("4 byte slice");
+    let hash_check = sha256d::Hash::hash(&ret[..check_start])[..4].try_into().expect("4 byte slice");
     let data_check = ret[check_start..].try_into().expect("4 byte slice");
 
     let expected = u32::from_le_bytes(hash_check);
     let actual = u32::from_le_bytes(data_check);
 
     if actual != expected {
+        error!("Checksum incorrect: expected {}, got {}", expected, actual);
         return Err(IncorrectChecksumError { incorrect: actual, expected }.into());
     }
 
     ret.truncate(check_start);
+    info!("Decoded and checksum verified result: {:?}", ret);
     Ok(ret)
 }
 
