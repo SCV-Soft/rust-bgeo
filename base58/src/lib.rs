@@ -43,7 +43,7 @@ use crate::error::{IncorrectChecksumError, TooShortError};
 #[doc(inline)]
 pub use self::error::{Error, InvalidCharacterError};
 
-use log::{info, error};
+use log::{error, info};
 
 #[rustfmt::skip]
 static BASE58_DIGITS: [Option<u8>; 128] = [
@@ -105,7 +105,8 @@ pub fn decode_check(data: &str) -> Result<Vec<u8>, Error> {
     }
     let check_start = ret.len() - 4;
 
-    let hash_check = sha256d::Hash::hash(&ret[..check_start])[..4].try_into().expect("4 byte slice");
+    let hash_check =
+        sha256d::Hash::hash(&ret[..check_start])[..4].try_into().expect("4 byte slice");
     let data_check = ret[check_start..].try_into().expect("4 byte slice");
 
     let expected = u32::from_le_bytes(hash_check);
